@@ -243,3 +243,41 @@ Una vez instalado, podrás usar Aegis Code localmente con todas las funcionalida
 - ✅ Foro de ciberseguridad
 
 ¡Disfruta usando Aegis Code en tu entorno local! 🚀 
+
+# Instrucciones para ejecutar scripts descargados en Windows
+
+## 1. Abrir los archivos en un IDE
+
+Los archivos descargados con extensión `.ps1` (PowerShell), `.py` (Python) u otros scripts deben abrirse en un **IDE** (como VS Code, PyCharm, etc.) o en un editor de texto avanzado. Esto es importante porque estos archivos contienen **código** y no deben abrirse como documentos de texto plano o con programas de ofimática.
+
+---
+
+## 2. Permitir la ejecución de scripts en PowerShell
+
+Por seguridad, Windows PowerShell no permite ejecutar scripts por defecto. Si al intentar ejecutar un script ves un error como:
+
+> "File ... cannot be loaded because running scripts is disabled on this system."
+
+Sigue estos pasos para permitir la ejecución **solo en la sesión actual** (recomendado para desarrollo):
+
+### Pasos:
+
+1. **Abre PowerShell como administrador**  
+   Haz clic derecho en el icono de PowerShell y selecciona "Ejecutar como administrador".
+
+2. **Ejecuta este comando:**
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+   ```
+   Esto permite ejecutar scripts solo en la ventana de PowerShell abierta. Cuando la cierres, la política vuelve a la original.
+
+3. **Ejecuta tu script normalmente:**
+   ```powershell
+   .\nombre_del_script.ps1
+   ```
+
+---
+
+**Nota:** No cambies la política de ejecución global salvo que sepas lo que haces. Si tienes dudas, consulta con el responsable del proyecto.
+
+--- 
