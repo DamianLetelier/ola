@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Reportes - Foro de Ciberseguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-user me-2"></i>
+                                Mis Reportes
+                            </h2>
+                            <p class="mb-0">Gestiona tus reportes de ciberseguridad</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-dark me-2">
+                                <i class="fas fa-arrow-left me-1"></i>Volver al Foro
+                            </a>
+                            <a href="{% url 'crear_reporte_foro' %}" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>Nuevo Reporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_reportes }}</h3>
+                    <p class="mb-0">Total Reportes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes|length }}</h3>
+                    <p class="mb-0">En esta página</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes|length }}</h3>
+                    <p class="mb-0">Analizados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes|length }}</h3>
+                    <p class="mb-0">Resueltos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Reportes -->
+    <div class="row">
+        <div class="col-12">
+            {% if reportes %}
+                {% for reporte in reportes %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">
+                                    <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="text-decoration-none">
+                                        {{ reporte.titulo }}
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted">
+                                    {{ reporte.descripcion|truncatewords:30 }}
+                                </p>
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <span class="badge bg-primary">{{ reporte.get_categoria_display }}</span>
+                                    <span class="badge bg-{% if reporte.estado == 'PENDIENTE' %}warning{% elif reporte.estado == 'ANALIZADO' %}info{% elif reporte.estado == 'RESUELTO' %}success{% else %}secondary{% endif %}">
+                                        {{ reporte.get_estado_display }}
+                                    </span>
+                                    {% if reporte.tipo_ataque_detectado %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-bug me-1"></i>{{ reporte.get_tipo_ataque_detectado_display }}
+                                    </span>
+                                    {% endif %}
+                                    {% if reporte.confianza_analisis %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-percentage me-1"></i>{{ reporte.confianza_analisis }}% confianza
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-calendar me-1"></i>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}
+                                </div>
+                                {% if reporte.empresa %}
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-building me-1"></i>{{ reporte.empresa.Nombre_Empresa }}
+                                </div>
+                                {% endif %}
+                                <div class="text-muted small">
+                                    <i class="fas fa-comments me-1"></i>{{ reporte.respuestas_detalle.count }} respuestas
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    {% if reporte.fecha_analisis %}
+                                    <i class="fas fa-clock me-1"></i>Analizado: {{ reporte.fecha_analisis|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                    <i class="fas fa-clock me-1"></i>Pendiente de análisis
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="btn btn-sm btn-outline-primary">
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Paginación -->
+                {% if reportes.has_other_pages %}
+                <nav aria-label="Paginación de mis reportes">
+                    <ul class="pagination justify-content-center">
+                        {% if reportes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ reportes.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in reportes.paginator.page_range %}
+                        {% if reportes.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > reportes.number|add:'-3' and num < reportes.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if reportes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ reportes.next_page_number }}">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No tienes reportes aún</h4>
+                    <p class="text-muted">Comienza compartiendo tu primer incidente de ciberseguridad</p>
+                    <a href="{% url 'crear_reporte_foro' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Primer Reporte
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

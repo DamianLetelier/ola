@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ reporte.titulo }} - Foro de Ciberseguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'foro_ciberseguridad' %}">Foro</a></li>
+            <li class="breadcrumb-item active">{{ reporte.titulo|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Reporte Principal -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">{{ reporte.titulo }}</h4>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-primary">{{ reporte.get_categoria_display }}</span>
+                            <span class="badge bg-{% if reporte.estado == 'PENDIENTE' %}warning{% elif reporte.estado == 'ANALIZADO' %}info{% elif reporte.estado == 'RESUELTO' %}success{% else %}secondary{% endif %}">
+                                {{ reporte.get_estado_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="card-text">{{ reporte.descripcion|linebreaks }}</p>
+                    </div>
+                    
+                    <!-- Análisis de Stanza -->
+                    {% if reporte.analisis_stanza %}
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-brain me-1"></i>Análisis Automático con IA
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Tipo de ataque detectado:</strong>
+                                        <span class="badge bg-danger ms-1">{{ reporte.get_tipo_ataque_detectado_display|default:"No determinado" }}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Confianza:</strong>
+                                        <span class="badge bg-{% if reporte.confianza_analisis > 80 %}success{% elif reporte.confianza_analisis > 60 %}warning{% else %}danger{% endif %} ms-1">
+                                            {{ reporte.confianza_analisis|default:0 }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                {% if reporte.analisis_stanza.palabras_clave_encontradas %}
+                                <div class="mt-2">
+                                    <strong>Palabras clave detectadas:</strong>
+                                    {% for tipo, palabras in reporte.analisis_stanza.palabras_clave_encontradas.items %}
+                                    <div class="mt-1">
+                                        <small class="text-muted">{{ tipo }}:</small>
+                                        {% for palabra in palabras %}
+                                        <span class="badge bg-primary me-1">{{ palabra }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <form method="post" action="{% url 'reanalizar_reporte' reporte.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-warning" onclick="return confirm('¿Re-analizar este reporte con IA?')">
+                                        <i class="fas fa-redo me-1"></i>Re-analizar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Sin Análisis Automático
+                                </h6>
+                                <p class="mb-0">Este reporte no ha sido analizado automáticamente con IA.</p>
+                            </div>
+                            <form method="post" action="{% url 'reanalizar_reporte' reporte.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-brain me-1"></i>Analizar con IA
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            <i class="fas fa-user me-1"></i>{{ reporte.usuario.username }}
+                            {% if reporte.empresa %}
+                            <span class="ms-2">
+                                <i class="fas fa-building me-1"></i>{{ reporte.empresa.Nombre_Empresa }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-calendar me-1"></i>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}
+                            {% if reporte.fecha_analisis %}
+                            <span class="ms-2">
+                                <i class="fas fa-clock me-1"></i>Analizado: {{ reporte.fecha_analisis|date:"d/m/Y H:i" }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Respuestas -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-1"></i>
+                        Respuestas ({{ respuestas.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if respuestas %}
+                        {% for respuesta in respuestas %}
+                        <div class="border-bottom pb-3 mb-3 {% if respuesta.es_solucion %}border-success{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>{{ respuesta.usuario.username }}</strong>
+                                    {% if respuesta.es_solucion %}
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-check me-1"></i>Solución
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">{{ respuesta.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0">{{ respuesta.contenido|linebreaks }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No hay respuestas aún. ¡Sé el primero en responder!</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Formulario de Respuesta -->
+                    <div class="mt-4">
+                        <h6>Agregar Respuesta</h6>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ form_respuesta.contenido }}
+                                {% if form_respuesta.contenido.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form_respuesta.contenido.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form_respuesta.es_solucion }}
+                                    <label class="form-check-label" for="{{ form_respuesta.es_solucion.id_for_label }}">
+                                        {{ form_respuesta.es_solucion.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Enviar Respuesta
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Información del Reporte -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Información del Reporte
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Categoría:</strong>
+                        <div>{{ reporte.get_categoria_display }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Estado:</strong>
+                        <div>
+                            <span class="badge bg-{% if reporte.estado == 'PENDIENTE' %}warning{% elif reporte.estado == 'ANALIZADO' %}info{% elif reporte.estado == 'RESUELTO' %}success{% else %}secondary{% endif %}">
+                                {{ reporte.get_estado_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Fecha de creación:</strong>
+                        <div>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    {% if reporte.fecha_analisis %}
+                    <div class="mb-3">
+                        <strong>Fecha de análisis:</strong>
+                        <div>{{ reporte.fecha_analisis|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    {% endif %}
+                    {% if reporte.fecha_resolucion %}
+                    <div class="mb-3">
+                        <strong>Fecha de resolución:</strong>
+                        <div>{{ reporte.fecha_resolucion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Análisis Detallado -->
+            {% if reporte.analisis_stanza %}
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Análisis Detallado
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if reporte.analisis_stanza.entidades_nombres %}
+                    <div class="mb-3">
+                        <strong>Entidades detectadas:</strong>
+                        <div class="mt-1">
+                            {% for entidad in reporte.analisis_stanza.entidades_nombres %}
+                            <span class="badge bg-info me-1 mb-1">{{ entidad.texto }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if reporte.analisis_stanza.analisis_linguistico %}
+                    <div class="mb-3">
+                        <strong>Análisis lingüístico:</strong>
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                {{ reporte.analisis_stanza.analisis_linguistico.total_tokens }} tokens analizados
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <strong>Detalles técnicos:</strong>
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                {{ reporte.analisis_stanza.detalles.palabras_totales }} palabras, 
+                                {{ reporte.analisis_stanza.detalles.longitud_texto }} caracteres
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Acciones -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tools me-1"></i>
+                        Acciones
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Volver al Foro
+                        </a>
+                        {% if user == reporte.usuario %}
+                        <button class="btn btn-outline-warning" disabled>
+                            <i class="fas fa-edit me-1"></i>Editar Reporte
+                        </button>
+                        {% endif %}
+                        {% if user.is_staff %}
+                        <button class="btn btn-outline-info" disabled>
+                            <i class="fas fa-cogs me-1"></i>Gestionar Estado
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

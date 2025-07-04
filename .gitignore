@@ -1,0 +1,187 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*$py.class
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos de base de datos
+*.sqlite3
+*.db
+db.sqlite3-journal
+
+# Configuración local
+*.env
+.env
+local_settings.py
+
+# Archivos de migración temporales
+*.pyc
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de build
+*.egg-info/
+dist/
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Archivos grandes y multimedia (para reducir tamaño)
+media/
+staticfiles/
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff
+*.svg
+*.ico
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Archivos de logs y temporales
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de testing y coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Archivos de documentación
+docs/_build/
+/site
+
+# Archivos de Jupyter
+.ipynb_checkpoints
+
+# Archivos de IPython
+profile_default/
+ipython_config.py
+
+# Archivos de pyenv
+.python-version
+
+# Archivos de Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Archivos de SageMath
+*.sage.py
+
+# Archivos de Spyder
+.spyderproject
+.spyproject
+
+# Archivos de Rope
+.ropeproject
+
+# Archivos de mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Archivos de Pyre
+.pyre/
+
+# Archivos de PEP 582
+__pypackages__/
+
+# Archivos de traducción
+*.mo
+*.pot
+
+# Archivos de PyInstaller
+*.manifest
+*.spec
+
+# Archivos de webassets
+.webassets-cache
+
+# Archivos de Scrapy
+.scrapy
+
+# Archivos de PyBuilder
+target/
+
+# Excluir archivos específicos del proyecto que son grandes
+Artefacto-8-Presentación-final/
+herramientas/
+proyecto/
+yara_rules/
+*.mp4
+*.pptx
+*.docx
+*.gif
+*.webp
+*.png
+*.jpg
+*.jpeg
+*.avi
+*.mov
+*.pdf
+*.doc
+*.xls
+*.xlsx
+*.ppt 

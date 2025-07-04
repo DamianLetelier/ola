@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Reporte - Foro de Ciberseguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Nuevo Reporte de Ciberseguridad
+                            </h2>
+                            <p class="mb-0">Comparte tu experiencia para ayudar a la comunidad</p>
+                        </div>
+                        <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i>Volver al Foro
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <form method="post" id="reporteForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Título -->
+                                <div class="mb-3">
+                                    <label for="{{ form.titulo.id_for_label }}" class="form-label">
+                                        <i class="fas fa-heading me-1"></i>{{ form.titulo.label }}
+                                    </label>
+                                    {{ form.titulo }}
+                                    {% if form.titulo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.titulo.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text">Describe brevemente el problema de ciberseguridad</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Categoría -->
+                                <div class="mb-3">
+                                    <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>{{ form.categoria.label }}
+                                    </label>
+                                    {{ form.categoria }}
+                                    {% if form.categoria.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.categoria.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-4">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>{{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.descripcion.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <strong>Incluye:</strong> síntomas, fechas, archivos afectados, mensajes de error, 
+                                pasos que seguiste, y cualquier detalle que consideres relevante.
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-1"></i>Información importante
+                            </h6>
+                            <ul class="mb-0">
+                                <li>Tu reporte será analizado automáticamente con IA para detectar el tipo de ataque</li>
+                                <li>La información será visible para la comunidad de ciberseguridad</li>
+                                <li>No incluyas información sensible como contraseñas o datos personales</li>
+                                <li>Puedes editar tu reporte después de publicarlo</li>
+                            </ul>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Publicar Reporte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Guía de categorías -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-1"></i>
+                        Guía de Categorías
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-danger">
+                                <i class="fas fa-bug me-1"></i>Malware
+                            </h6>
+                            <p class="small text-muted">Virus, troyanos, spyware, adware, rootkits, backdoors</p>
+                            
+                            <h6 class="text-warning">
+                                <i class="fas fa-fish me-1"></i>Phishing
+                            </h6>
+                            <p class="small text-muted">Correos falsos, sitios web falsos, suplantación de identidad</p>
+                            
+                            <h6 class="text-danger">
+                                <i class="fas fa-lock me-1"></i>Ransomware
+                            </h6>
+                            <p class="small text-muted">Encriptación de archivos, demandas de rescate</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info">
+                                <i class="fas fa-server me-1"></i>DoS/DDoS
+                            </h6>
+                            <p class="small text-muted">Denegación de servicio, sobrecarga de servidores</p>
+                            
+                            <h6 class="text-warning">
+                                <i class="fas fa-user-secret me-1"></i>Intrusión
+                            </h6>
+                            <p class="small text-muted">Acceso no autorizado, login sospechoso</p>
+                            
+                            <h6 class="text-danger">
+                                <i class="fas fa-database me-1"></i>Robo de Datos
+                            </h6>
+                            <p class="small text-muted">Filtración de información, brechas de seguridad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('reporteForm');
+    const tituloInput = document.getElementById('{{ form.titulo.id_for_label }}');
+    const descripcionInput = document.getElementById('{{ form.descripcion.id_for_label }}');
+    
+    // Contador de caracteres para el título
+    function updateTituloCounter() {
+        const maxLength = 200;
+        const currentLength = tituloInput.value.length;
+        const remaining = maxLength - currentLength;
+        
+        if (!tituloInput.nextElementSibling || !tituloInput.nextElementSibling.classList.contains('char-counter')) {
+            const counter = document.createElement('small');
+            counter.className = 'char-counter text-muted';
+            tituloInput.parentNode.insertBefore(counter, tituloInput.nextSibling);
+        }
+        
+        const counter = tituloInput.nextElementSibling;
+        counter.textContent = `${remaining} caracteres restantes`;
+        
+        if (remaining < 20) {
+            counter.className = 'char-counter text-warning';
+        } else {
+            counter.className = 'char-counter text-muted';
+        }
+    }
+    
+    tituloInput.addEventListener('input', updateTituloCounter);
+    updateTituloCounter();
+    
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        const titulo = tituloInput.value.trim();
+        const descripcion = descripcionInput.value.trim();
+        
+        if (titulo.length < 10) {
+            e.preventDefault();
+            alert('El título debe tener al menos 10 caracteres');
+            tituloInput.focus();
+            return;
+        }
+        
+        if (descripcion.length < 50) {
+            e.preventDefault();
+            alert('La descripción debe tener al menos 50 caracteres');
+            descripcionInput.focus();
+            return;
+        }
+        
+        // Mostrar indicador de carga
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analizando...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %} 

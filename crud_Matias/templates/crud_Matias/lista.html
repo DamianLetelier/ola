@@ -1,0 +1,61 @@
+{% extends "crud_Matias/base.html" %}
+
+{% block page_title %}CRUD de Empleados{% endblock %}
+{% block content_title %}CRUD de Empleados{% endblock %}
+
+{% block crud_content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Crear Nuevo Empleado</div>
+            <div class="card-body">
+                <a href="{% url 'crear_empleado' %}" class="btn btn-primary">Crear Empleado</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Empleados Registrados</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Edad</th>
+                            <th>Salario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in empleados %}
+                        <tr>
+                            <td>
+                                {% if empleado.imagen %}
+                                    <img src="{{ empleado.imagen.url }}" alt="{{ empleado.nombre }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                                {% else %}
+                                    <span class="text-muted"><i class="bi bi-person"></i></span>
+                                {% endif %}
+                            </td>
+                            <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
+                            <td>{{ empleado.email }}</td>
+                            <td>{{ empleado.edad }}</td>
+                            <td>${{ empleado.salario }}</td>
+                            <td>
+                                <a href="{% url 'actualizar_empleado' empleado.id %}" class="btn btn-sm btn-warning">Editar</a>
+                                <a href="{% url 'eliminar_empleado' empleado.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay empleados registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

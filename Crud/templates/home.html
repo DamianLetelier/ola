@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Aegis Code{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Protección Digital Inteligente</h1>
+            <p class="lead mb-4">Donde la protección se escribe en código</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'escanear_archivo' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shield-check"></i> Escanear Archivo
+                </a>
+                <a href="{% url 'dashboard_seguridad' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-graph-up"></i> Panel de Seguridad
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Estadísticas Rápidas -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-shield-exclamation display-4 text-danger mb-3"></i>
+                            <h3 class="card-title h5">Amenazas Detectadas</h3>
+                            <p class="display-6 mb-0">{{ amenazas.count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-graph-up display-4 text-success mb-3"></i>
+                            <h3 class="card-title h5">Actividades Recientes</h3>
+                            <p class="display-6 mb-0">{{ actividades.count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-building display-4 text-primary mb-3"></i>
+                            <h3 class="card-title h5">Empresa</h3>
+                            <p class="display-6 mb-0">{{ empresa.Nombre_Empresa }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenido Principal -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Amenazas Recientes -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title h5 mb-0">Amenazas Recientes</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if amenazas %}
+                                <div class="list-group list-group-flush">
+                                    {% for amenaza in amenazas %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ amenaza.get_tipo_display }}</h6>
+                                                    <p class="mb-1 small">{{ amenaza.descripcion }}</p>
+                                                    <small class="text-muted">
+                                                        {{ amenaza.fecha_deteccion|date:"d/m/Y H:i" }}
+                                                    </small>
+                                                </div>
+                                                <span class="badge {% if amenaza.severidad == 'ALTA' %}bg-danger{% elif amenaza.severidad == 'MEDIA' %}bg-warning{% else %}bg-info{% endif %}">
+                                                    {{ amenaza.get_severidad_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Paginación para amenazas -->
+                                {% if amenazas.has_other_pages %}
+                                <div class="card-footer">
+                                    <nav aria-label="Paginación de amenazas">
+                                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                                            {% if amenazas.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page_amenazas={{ amenazas.previous_page_number }}">Anterior</a>
+                                                </li>
+                                            {% endif %}
+                                            
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ amenazas.number }} de {{ amenazas.paginator.num_pages }}</span>
+                                            </li>
+                                            
+                                            {% if amenazas.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page_amenazas={{ amenazas.next_page_number }}">Siguiente</a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="p-3 text-center text-muted">
+                                    <i class="bi bi-check-circle display-4"></i>
+                                    <p class="mt-2 mb-0">No hay amenazas detectadas</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actividades Recientes -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title h5 mb-0">Actividades Recientes</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if actividades %}
+                                <div class="list-group list-group-flush">
+                                    {% for actividad in actividades %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ actividad.get_tipo_display }}</h6>
+                                                    <p class="mb-1 small">{{ actividad.descripcion }}</p>
+                                                    <small class="text-muted">
+                                                        {{ actividad.fecha|date:"d/m/Y H:i" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Paginación para actividades -->
+                                {% if actividades.has_other_pages %}
+                                <div class="card-footer">
+                                    <nav aria-label="Paginación de actividades">
+                                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                                            {% if actividades.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page_actividades={{ actividades.previous_page_number }}">Anterior</a>
+                                                </li>
+                                            {% endif %}
+                                            
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ actividades.number }} de {{ actividades.paginator.num_pages }}</span>
+                                            </li>
+                                            
+                                            {% if actividades.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page_actividades={{ actividades.next_page_number }}">Siguiente</a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="p-3 text-center text-muted">
+                                    <i class="bi bi-clock-history display-4"></i>
+                                    <p class="mt-2 mb-0">No hay actividad reciente</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 60px 0;
+        }
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+        .hero-section .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %} 

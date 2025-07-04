@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analizar Reportes Pendientes - Foro de Ciberseguridad{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-cogs me-2"></i>
+                                Analizar Reportes Pendientes
+                            </h2>
+                            <p class="mb-0">Panel de administración para análisis automático con IA</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-1"></i>Volver al Foro
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_pendientes }}</h3>
+                    <p class="mb-0">Reportes Pendientes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes_pendientes|length }}</h3>
+                    <p class="mb-0">En esta página</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>IA</h3>
+                    <p class="mb-0">Stanza Activo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acción de Análisis -->
+    {% if total_pendientes > 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot me-1"></i>
+                        Análisis Automático con IA
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        <strong>Proceso:</strong> El sistema analizará automáticamente todos los reportes pendientes 
+                        usando procesamiento de lenguaje natural (Stanza) para detectar tipos de ataques cibernéticos.
+                    </p>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-1"></i>Tipos de ataques que puede detectar:
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li><strong>Malware:</strong> Virus, troyanos, spyware</li>
+                                    <li><strong>Phishing:</strong> Suplantación, correos falsos</li>
+                                    <li><strong>Ransomware:</strong> Encriptación, rescate</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li><strong>DoS/DDoS:</strong> Denegación de servicio</li>
+                                    <li><strong>Intrusión:</strong> Acceso no autorizado</li>
+                                    <li><strong>Robo de Datos:</strong> Filtración de información</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-lg" onclick="return confirm('¿Estás seguro de que quieres analizar todos los reportes pendientes?')">
+                            <i class="fas fa-play me-1"></i>Iniciar Análisis Automático
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lista de Reportes Pendientes -->
+    <div class="row">
+        <div class="col-12">
+            {% if reportes_pendientes %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-1"></i>
+                            Reportes Pendientes de Análisis
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for reporte in reportes_pendientes %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="text-decoration-none">
+                                            {{ reporte.titulo }}
+                                        </a>
+                                    </h6>
+                                    <p class="text-muted mb-2">
+                                        {{ reporte.descripcion|truncatewords:25 }}
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-primary">{{ reporte.get_categoria_display }}</span>
+                                        <span class="badge bg-warning">Pendiente de Análisis</span>
+                                        <span class="badge bg-secondary">{{ reporte.usuario.username }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="text-muted small mb-2">
+                                        <i class="fas fa-calendar me-1"></i>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}
+                                    </div>
+                                    {% if reporte.empresa %}
+                                    <div class="text-muted small mb-2">
+                                        <i class="fas fa-building me-1"></i>{{ reporte.empresa.Nombre_Empresa }}
+                                    </div>
+                                    {% endif %}
+                                    <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="btn btn-sm btn-outline-primary">
+                                        Ver Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h4 class="text-success">¡Excelente trabajo!</h4>
+                    <p class="text-muted">No hay reportes pendientes de análisis. Todos han sido procesados.</p>
+                    <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Volver al Foro
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Información Técnica -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs me-1"></i>
+                        Información Técnica
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Proceso de Análisis:</h6>
+                            <ol class="small">
+                                <li>Extracción de texto del título y descripción</li>
+                                <li>Análisis de palabras clave por tipo de ataque</li>
+                                <li>Procesamiento lingüístico con Stanza</li>
+                                <li>Detección de entidades nombradas</li>
+                                <li>Cálculo de nivel de confianza</li>
+                                <li>Actualización automática del estado</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Capacidades de IA:</h6>
+                            <ul class="small">
+                                <li>Análisis de sentimientos</li>
+                                <li>Detección de patrones</li>
+                                <li>Clasificación automática</li>
+                                <li>Extracción de entidades</li>
+                                <li>Análisis de contexto</li>
+                                <li>Aprendizaje continuo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmar antes de iniciar el análisis
+    const form = document.querySelector('form[method="post"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const totalPendientes = {{ total_pendientes }};
+            if (totalPendientes > 10) {
+                const confirmacion = confirm(`Hay ${totalPendientes} reportes pendientes. El análisis puede tomar varios minutos. ¿Deseas continuar?`);
+                if (!confirmacion) {
+                    e.preventDefault();
+                } else {
+                    // Mostrar indicador de carga
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analizando...';
+                    submitBtn.disabled = true;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

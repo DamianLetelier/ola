@@ -1,0 +1,1 @@
+web: gunicorn Crud_Damian.wsgi --log-file - 

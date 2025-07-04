@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Foro de Ciberseguridad{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del Foro -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="mb-2">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Foro de Ciberseguridad
+                            </h1>
+                            <p class="mb-0">Comparte y analiza incidentes de ciberseguridad con la comunidad</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'crear_reporte_foro' %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-plus me-2"></i>Nuevo Reporte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_reportes }}</h3>
+                    <p class="mb-0">Total Reportes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes_pendientes }}</h3>
+                    <p class="mb-0">Pendientes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes_analizados }}</h3>
+                    <p class="mb-0">Analizados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ reportes|length }}</h3>
+                    <p class="mb-0">En esta página</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="categoria" class="form-label">Categoría</label>
+                            <select name="categoria" id="categoria" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                {% for codigo, nombre in categorias %}
+                                <option value="{{ codigo }}" {% if codigo == categoria_actual %}selected{% endif %}>
+                                    {{ nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                {% for codigo, nombre in estados %}
+                                <option value="{{ codigo }}" {% if codigo == estado_actual %}selected{% endif %}>
+                                    {{ nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-filter me-1"></i>Filtrar
+                            </button>
+                            <a href="{% url 'foro_ciberseguridad' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Limpiar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Reportes -->
+    <div class="row">
+        <div class="col-12">
+            {% if reportes %}
+                {% for reporte in reportes %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">
+                                    <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="text-decoration-none">
+                                        {{ reporte.titulo }}
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted">
+                                    {{ reporte.descripcion|truncatewords:30 }}
+                                </p>
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <span class="badge bg-primary">{{ reporte.get_categoria_display }}</span>
+                                    <span class="badge bg-{% if reporte.estado == 'PENDIENTE' %}warning{% elif reporte.estado == 'ANALIZADO' %}info{% elif reporte.estado == 'RESUELTO' %}success{% else %}secondary{% endif %}">
+                                        {{ reporte.get_estado_display }}
+                                    </span>
+                                    {% if reporte.tipo_ataque_detectado %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-bug me-1"></i>{{ reporte.get_tipo_ataque_detectado_display }}
+                                    </span>
+                                    {% endif %}
+                                    {% if reporte.confianza_analisis %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-percentage me-1"></i>{{ reporte.confianza_analisis }}% confianza
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-user me-1"></i>{{ reporte.usuario.username }}
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    <i class="fas fa-calendar me-1"></i>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}
+                                </div>
+                                {% if reporte.empresa %}
+                                <div class="text-muted small">
+                                    <i class="fas fa-building me-1"></i>{{ reporte.empresa.Nombre_Empresa }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-comments me-1"></i>
+                                    {{ reporte.respuestas_detalle.count }} respuestas
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <a href="{% url 'detalle_reporte_foro' reporte.pk %}" class="btn btn-sm btn-outline-primary">
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Paginación -->
+                {% if reportes.has_other_pages %}
+                <nav aria-label="Paginación del foro">
+                    <ul class="pagination justify-content-center">
+                        {% if reportes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ reportes.previous_page_number }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if estado_actual %}&estado={{ estado_actual }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in reportes.paginator.page_range %}
+                        {% if reportes.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > reportes.number|add:'-3' and num < reportes.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if estado_actual %}&estado={{ estado_actual }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if reportes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ reportes.next_page_number }}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if estado_actual %}&estado={{ estado_actual }}{% endif %}">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay reportes disponibles</h4>
+                    <p class="text-muted">Sé el primero en compartir un incidente de ciberseguridad</p>
+                    <a href="{% url 'crear_reporte_foro' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Primer Reporte
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Enlaces rápidos -->
+<div class="position-fixed bottom-0 end-0 p-3">
+    <div class="btn-group-vertical">
+        <a href="{% url 'analisis_texto_stanza' %}" class="btn btn-info" title="Análisis de Texto">
+            <i class="fas fa-brain"></i>
+        </a>
+        <a href="{% url 'mis_reportes_foro' %}" class="btn btn-warning" title="Mis Reportes">
+            <i class="fas fa-user"></i>
+        </a>
+        {% if user.is_staff %}
+        <a href="{% url 'analizar_reportes_pendientes' %}" class="btn btn-danger" title="Analizar Pendientes">
+            <i class="fas fa-cogs"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filtros cuando cambien
+    const filtros = document.querySelectorAll('select[name="categoria"], select[name="estado"]');
+    filtros.forEach(filtro => {
+        filtro.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Escanear Archivo - Sistema de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Escanear Archivo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Instrucciones:</strong> Seleccione un archivo para escanear en busca de malware. 
+                        El sistema utilizará reglas YARA locales y VirusTotal para el análisis.
+                    </div>
+
+                    <!-- Formulario de escaneo -->
+                    <form method="post" enctype="multipart/form-data" id="formEscaneo">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="archivo" class="form-label">
+                                <strong>Seleccionar Archivo:</strong>
+                            </label>
+                            <input type="file" class="form-control" id="archivo" name="archivo" required>
+                            <div class="form-text">
+                                Formatos soportados: .exe, .dll, .pdf, .doc, .docx, .xls, .xlsx, .zip, .rar, etc.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="btnEscanear">
+                                <i class="fas fa-search me-2"></i>
+                                Iniciar Escaneo
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Área de progreso -->
+                    <div id="areaProgreso" style="display: none;" class="mt-4">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cog fa-spin me-2"></i>
+                                    Escaneando archivo...
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Archivo:</strong> <span id="nombreArchivo"></span>
+                                </div>
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         id="barraProgreso" 
+                                         role="progressbar" 
+                                         style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="text-muted">
+                                    <small>
+                                        <i class="fas fa-clock me-1"></i>
+                                        <span id="tiempoEstimado">Calculando tiempo...</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado del escaneo -->
+                    <div id="areaResultado" style="display: none;" class="mt-4">
+                        <div class="card" id="cardResultado">
+                            <div class="card-header" id="headerResultado">
+                                <h5 class="mb-0" id="tituloResultado">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Resultado del Escaneo
+                                </h5>
+                            </div>
+                            <div class="card-body" id="cuerpoResultado">
+                                <!-- El contenido se llenará dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-shield-check me-2"></i>
+                                Tecnologías de Escaneo
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-check text-success me-2"></i>Reglas YARA locales</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Análisis de VirusTotal</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Detección de malware</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Análisis de comportamiento</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Limitaciones
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-info text-warning me-2"></i>Archivos máx. 32MB</li>
+                                <li><i class="fas fa-info text-warning me-2"></i>Rate limit VirusTotal</li>
+                                <li><i class="fas fa-info text-warning me-2"></i>Un escaneo a la vez</li>
+                                <li><i class="fas fa-info text-warning me-2"></i>Requiere conexión internet</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Actividades -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Historial de Actividades Recientes
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if actividades %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for actividad in actividades %}
+                                        <tr>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ actividad.fecha|date:"d/m/Y H:i" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if actividad.tipo == 'ESCANEO' %}
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-search me-1"></i>Escaneo
+                                                    </span>
+                                                {% elif actividad.tipo == 'ALERTA' %}
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Alerta
+                                                    </span>
+                                                {% elif actividad.tipo == 'ACTUALIZACION' %}
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-sync me-1"></i>Actualización
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-cog me-1"></i>{{ actividad.get_tipo_display }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ actividad.descripcion }}</strong>
+                                                {% if actividad.detalles and actividad.detalles.archivo %}
+                                                    <br><small class="text-muted">Archivo: {{ actividad.detalles.archivo }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if actividad.tipo == 'ESCANEO' %}
+                                                    {% if actividad.detalles and actividad.detalles.resultado and actividad.detalles.resultado.es_malware %}
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-times me-1"></i>Malware Detectado
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>Archivo Seguro
+                                                        </span>
+                                                    {% endif %}
+                                                {% elif actividad.tipo == 'ALERTA' %}
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation me-1"></i>Amenaza
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Completado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if actividad.detalles %}
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#detalles{{ actividad.id }}" 
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-eye me-1"></i>Ver
+                                                    </button>
+                                                {% else %}
+                                                    <span class="text-muted">Sin detalles</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% if actividad.detalles %}
+                                            <tr>
+                                                <td colspan="5" class="p-0">
+                                                    <div class="collapse" id="detalles{{ actividad.id }}">
+                                                        <div class="card card-body m-2 bg-light">
+                                                            <h6 class="mb-2">Detalles Técnicos:</h6>
+                                                            <div class="bg-dark text-light p-2 rounded" style="font-size: 0.8rem; font-family: monospace; max-width: 100%; overflow-x: auto; word-wrap: break-word;">
+                                                                {% for key, value in actividad.detalles.items %}
+{{ key }}: {{ value }}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="fas fa-inbox display-4 mb-3"></i>
+                            <h5>No hay actividades registradas</h5>
+                            <p class="mb-0">Realice su primer escaneo para ver el historial aquí.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if actividades %}
+                    <div class="card-footer text-center">
+                        <small class="text-muted">
+                            Mostrando las últimas {{ actividades|length }} actividades
+                        </small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formEscaneo');
+    const btnEscanear = document.getElementById('btnEscanear');
+    const areaProgreso = document.getElementById('areaProgreso');
+    const areaResultado = document.getElementById('areaResultado');
+    const nombreArchivo = document.getElementById('nombreArchivo');
+    const barraProgreso = document.getElementById('barraProgreso');
+    const tiempoEstimado = document.getElementById('tiempoEstimado');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('archivo');
+        if (!fileInput.files[0]) {
+            alert('Por favor seleccione un archivo.');
+            return;
+        }
+
+        // Mostrar área de progreso
+        areaProgreso.style.display = 'block';
+        areaResultado.style.display = 'none';
+        btnEscanear.disabled = true;
+        btnEscanear.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Escaneando...';
+        
+        nombreArchivo.textContent = fileInput.files[0].name;
+        
+        // Simular progreso
+        let progreso = 0;
+        let intervalo = setInterval(() => {
+            // Progreso más lento y realista
+            if (progreso < 25) {
+                progreso += 2; // Lento al inicio
+                tiempoEstimado.textContent = 'Calculando hash del archivo...';
+            } else if (progreso < 50) {
+                progreso += 1; // Muy lento durante YARA
+                tiempoEstimado.textContent = 'Escaneando con reglas YARA...';
+            } else if (progreso < 75) {
+                progreso += 0.5; // Extremadamente lento durante VirusTotal
+                tiempoEstimado.textContent = 'Consultando VirusTotal...';
+            } else if (progreso < 90) {
+                progreso += 1; // Lento al final
+                tiempoEstimado.textContent = 'Finalizando análisis...';
+            } else {
+                progreso = 90; // Mantener en 90% hasta que termine
+            }
+            
+            barraProgreso.style.width = progreso + '%';
+            barraProgreso.textContent = Math.round(progreso) + '%';
+        }, 200); // Actualizar cada 200ms para ser más suave
+
+        // Enviar formulario
+        const formData = new FormData(form);
+        fetch('', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(data => {
+            // Limpiar el intervalo de progreso
+            if (intervalo) {
+                clearInterval(intervalo);
+            }
+            
+            // Completar la barra de progreso
+            barraProgreso.style.width = '100%';
+            barraProgreso.textContent = '100%';
+            tiempoEstimado.textContent = 'Escaneo completado';
+            
+            // Simular delay para mostrar el resultado
+            setTimeout(() => {
+                areaProgreso.style.display = 'none';
+                areaResultado.style.display = 'block';
+                btnEscanear.disabled = false;
+                btnEscanear.innerHTML = '<i class="fas fa-search me-2"></i>Iniciar Escaneo';
+                
+                // Recargar la página para mostrar el mensaje de resultado y actualizar el historial
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            // Limpiar el intervalo de progreso en caso de error
+            if (intervalo) {
+                clearInterval(intervalo);
+            }
+            
+            console.error('Error:', error);
+            alert('Error durante el escaneo. Por favor intente nuevamente.');
+            areaProgreso.style.display = 'none';
+            btnEscanear.disabled = false;
+            btnEscanear.innerHTML = '<i class="fas fa-search me-2"></i>Iniciar Escaneo';
+        });
+    });
+});
+</script>
+{% endblock %} 

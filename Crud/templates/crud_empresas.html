@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}CRUD de Empresas{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">CRUD de Empresas</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Crear Nueva Empresa</div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" name="crear_empresa" class="btn btn-primary">Crear Empresa</button>
+                    </form>
+                </div>
+            </div>
+            {% if edit_empresa %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning">Editar Empresa</div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="empresa_id" value="{{ edit_empresa.id }}">
+                        {% for field in edit_form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" name="editar_empresa" class="btn btn-warning">Actualizar Empresa</button>
+                        <a href="{% url 'crud_empresas' %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            {% if delete_empresa %}
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">Eliminar Empresa</div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="empresa_id" value="{{ delete_empresa.id }}">
+                        <p>¿Estás seguro de que deseas eliminar la empresa "{{ delete_empresa.Nombre_Empresa }}"?</p>
+                        <button type="submit" name="eliminar_empresa" class="btn btn-danger">Sí, Eliminar</button>
+                        <a href="{% url 'crud_empresas' %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Empresas Registradas</div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>Representante</th>
+                                <th>Empleados</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresas %}
+                            <tr>
+                                <td>
+                                    {% if empresa.imagen %}
+                                        <img src="{{ empresa.imagen.url }}" alt="{{ empresa.Nombre_Empresa }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                                    {% else %}
+                                        <span class="text-muted"><i class="bi bi-building"></i></span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ empresa.Nombre_Empresa }}</td>
+                                <td>{{ empresa.representante }}</td>
+                                <td>{{ empresa.Cant_Empleados }}</td>
+                                <td>
+                                    <a href="?edit={{ empresa.id }}" class="btn btn-sm btn-warning">Editar</a>
+                                    <a href="?delete={{ empresa.id }}" class="btn btn-sm btn-danger">Eliminar</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No hay empresas registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,14 @@
+{% extends "crud_Matias/base.html" %}
+
+{% block title %}Eliminar Empleado{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning p-4 rounded shadow-sm">
+    <h3 class="mb-3">¿Estás seguro de eliminar a <strong>{{ empleado.nombre }} {{ empleado.apellido }}</strong>?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{% url 'lista_empleados' %}" class="btn btn-secondary ms-2">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

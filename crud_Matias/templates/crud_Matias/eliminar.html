@@ -1,0 +1,44 @@
+{% extends "crud_Matias/base.html" %}
+
+{% block page_title %}Eliminar Empleado{% endblock %}
+{% block content_title %}Eliminar Empleado{% endblock %}
+
+{% block crud_content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">Confirmar Eliminación</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <p>¿Estás seguro de que deseas eliminar al empleado <strong>"{{ empleado.nombre }} {{ empleado.apellido }}"</strong>?</p>
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                    <a href="{% url 'lista_empleados' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Información del Empleado</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        {% if empleado.imagen %}
+                            <img src="{{ empleado.imagen.url }}" alt="{{ empleado.nombre }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+                        {% else %}
+                            <span class="text-muted"><i class="bi bi-person" style="font-size: 100px;"></i></span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h5>{{ empleado.nombre }} {{ empleado.apellido }}</h5>
+                        <p><strong>Email:</strong> {{ empleado.email }}</p>
+                        <p><strong>Edad:</strong> {{ empleado.edad }} años</p>
+                        <p><strong>Salario:</strong> ${{ empleado.salario }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
