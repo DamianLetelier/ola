@@ -23,3 +23,4 @@ else:
 "
 
 echo "=== APLICACIÓN LISTA ===" 
+exec gunicorn Crud_Damian.wsgi:application --bind 0.0.0.0:8000 
