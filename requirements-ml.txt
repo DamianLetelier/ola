@@ -1,0 +1,10 @@
+# Dependencias pesadas de Machine Learning
+# NO se instalan en Railway - solo para desarrollo local
+torch>=2.0.0
+stanza>=1.7.0
+yara-python>=4.3.0
+nltk>=3.8
+transformers>=4.30.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+spacy>=3.6.0 

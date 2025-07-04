@@ -19,6 +19,8 @@ dist/
 # Ignorar el requirements.txt completo para que no se suba a Docker
 requirements.txt
 requirements-full.txt
+requirements-ml.txt
+requirements-dev.txt
 
 # Ignorar datasets, modelos, cachés que no deban subirse
 models/
@@ -137,3 +139,6 @@ media/
 *.test
 *.out
 *.err 
+
+# Scripts de ML que no se necesitan en Railway
+install_ml_deps.py
