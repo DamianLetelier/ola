@@ -18,9 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
+from Crud.views import landing
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('Crud.urls')),
+    path('', landing, name='landing'),  # La raíz va a la landing page
+    path('healthcheck/', lambda request: HttpResponse("Healthy"), name='healthcheck'),
+    path('Crud/', include('Crud.urls')),
     path('matias/', include('crud_Matias.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
