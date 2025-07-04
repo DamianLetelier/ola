@@ -21,10 +21,13 @@ from django.conf.urls.static import static
 from django.http import HttpResponse
 from Crud.views import landing
 
+def simple_healthcheck(request):
+    return HttpResponse("Healthy")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', landing, name='landing'),  # La raíz va a la landing page
-    path('healthcheck/', lambda request: HttpResponse("Healthy"), name='healthcheck'),
-    path('Crud/', include('Crud.urls')),
+    path('', simple_healthcheck, name='root-health'),  # 👈 esto responde 200 a "/"
+    path('landing/', include('Crud.urls')),            # 👈 mueve la app a /landing/
+    path('healthcheck/', simple_healthcheck, name='healthcheck'),
     path('matias/', include('crud_Matias.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
