@@ -7,9 +7,10 @@ Este proyecto está configurado para ser desplegado en Railway.
 Railway tiene un límite de 4GB para el procesamiento de imágenes. El problema principal es que `requirements.txt` incluye librerías de machine learning muy pesadas (PyTorch, Spacy, Stanza, etc.) que no son necesarias para el despliegue web.
 
 ### Solución Implementada:
-- **`requirements-prod.txt`**: Solo dependencias esenciales para Railway (~100MB)
+- **`Dockerfile`**: Controla exactamente qué se instala (no más Nixpacks)
+- **`requirements-prod.txt`**: Solo dependencias esenciales (~300-600MB)
 - **`requirements-dev.txt`**: Todas las dependencias para desarrollo local
-- **Railway usará `requirements-prod.txt`** para mantener el despliegue liviano
+- **Railway usará Dockerfile** en lugar de Nixpacks para evitar dependencias innecesarias
 
 ### Archivos Excluidos del Repositorio:
 - **Carpetas duplicadas**: `herramientas/` (copia completa del proyecto)
@@ -25,7 +26,34 @@ Railway tiene un límite de 4GB para el procesamiento de imágenes. El problema 
 
 ## Archivos de Configuración
 
-### Procfile
+### Dockerfile
+Controla exactamente qué se instala en Railway:
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements-prod.txt requirements.txt
+COPY . .
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install -r requirements.txt
+ENV PATH="/opt/venv/bin:$PATH"
+EXPOSE 8000
+CMD ["gunicorn", "Crud_Damian.wsgi:application", "--bind", "0.0.0.0:8000"]
+```
+
+### requirements-prod.txt
+Solo dependencias esenciales para producción:
+```
+Django>=5.0
+gunicorn
+whitenoise
+dj-database-url
+python-dotenv
+django-crispy-forms
+crispy-bootstrap5
+```
+
+### Procfile (opcional con Dockerfile)
 Especifica cómo ejecutar la aplicación:
 ```
 web: gunicorn Crud_Damian.wsgi --log-file -
@@ -93,14 +121,11 @@ git commit -m "Preparado para Railway"
 git push origin main
 ```
 
-### 4. Configurar Railway para usar dependencias livianas
+### 4. Desplegar en Railway (Dockerfile automático)
 1. Conecta tu repositorio de GitHub a Railway
-2. Ve a **Settings** > **Nixpacks** > **Override build command**
-3. Coloca este comando:
-   ```bash
-   pip install -r requirements-prod.txt
-   ```
-4. Railway usará solo las dependencias esenciales (~100MB en lugar de 6.8GB)
+2. **Railway detectará automáticamente el Dockerfile** y lo usará
+3. **Nixpacks se desactivará automáticamente** (no más dependencias innecesarias)
+4. Railway usará solo las dependencias definidas en `requirements-prod.txt` (~300-600MB)
 
 ### 5. Desplegar en Railway
 1. Railway detectará automáticamente que es un proyecto Django
@@ -154,10 +179,16 @@ Si Railway muestra este error:
 3. Verifica que no haya archivos multimedia grandes en el repositorio
 4. Asegúrate de que el `.gitignore` esté funcionando correctamente
 
+### Error: "Image too large" o dependencias innecesarias
+Si Railway sigue intentando instalar librerías pesadas:
+1. **Asegúrate de que el Dockerfile esté en la raíz del proyecto**
+2. **Verifica que Nixpacks esté desactivado** (Railway lo hace automáticamente)
+3. **El Dockerfile controla exactamente qué se instala**
+
 ### Error: "ModuleNotFoundError: No module named 'dj_database_url'"
-Este error indica que Railway está usando el archivo incorrecto:
-1. Ve a Railway Settings > Nixpacks > Override build command
-2. Asegúrate de que el comando sea: `pip install -r requirements-prod.txt`
+Este error indica que Railway no está usando el Dockerfile:
+1. Verifica que el `Dockerfile` esté en la raíz del proyecto
+2. Asegúrate de que Railway detecte el Dockerfile automáticamente
 3. No uses `requirements.txt` (contiene librerías pesadas innecesarias)
 
 ### Archivos Necesarios Después del Despliegue
