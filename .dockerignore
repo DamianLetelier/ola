@@ -59,6 +59,7 @@ staticfiles/
 
 # Development files
 requirements-dev.txt
+requirements.txt
 *.ps1
 *.sh
 README_RAILWAY.md

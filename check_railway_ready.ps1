@@ -22,6 +22,21 @@ foreach ($file in $requiredFiles) {
 }
 
 Write-Host ""
+Write-Host "Verificando Dockerfile..." -ForegroundColor Yellow
+$dockerfileContent = Get-Content "Dockerfile" -Raw
+if ($dockerfileContent -match "pip install -r requirements-prod.txt") {
+    Write-Host "✅ Dockerfile usa requirements-prod.txt" -ForegroundColor Green
+} else {
+    Write-Host "❌ Dockerfile NO usa requirements-prod.txt" -ForegroundColor Red
+}
+
+if ($dockerfileContent -match "requirements.txt") {
+    Write-Host "❌ Dockerfile aún referencia requirements.txt" -ForegroundColor Red
+} else {
+    Write-Host "✅ Dockerfile NO referencia requirements.txt" -ForegroundColor Green
+}
+
+Write-Host ""
 Write-Host "Verificando dependencias de producción..." -ForegroundColor Yellow
 $prodDeps = Get-Content "requirements-prod.txt"
 $heavyDeps = @("torch", "spacy", "stanza", "nltk", "psutil")

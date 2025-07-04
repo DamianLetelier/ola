@@ -1,23 +1,25 @@
-# Usa una imagen Python liviana
+# Usa imagen base liviana
 FROM python:3.11-slim
 
-# Establece el directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copia solo lo necesario
-COPY requirements-prod.txt requirements.txt
-COPY . .
+# Copiar solo lo necesario
+COPY requirements-prod.txt .
 
-# Crea entorno virtual e instala dependencias
+# Crear entorno virtual e instalar dependencias limpias
 RUN python -m venv /opt/venv && \
     . /opt/venv/bin/activate && \
     pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r requirements-prod.txt
 
-# Agrega el entorno al PATH
+# Copiar el resto del proyecto
+COPY . .
+
+# Agregar entorno al PATH
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Expone el puerto
+# Exponer puerto
 EXPOSE 8000
 
 # Comando de inicio
