@@ -26,8 +26,8 @@ def simple_healthcheck(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', simple_healthcheck, name='root-health'),  # 👈 esto responde 200 a "/"
-    path('landing/', include('Crud.urls')),            # 👈 mueve la app a /landing/
+    path('', landing, name='landing'),  # landing page en /
     path('healthcheck/', simple_healthcheck, name='healthcheck'),
+    path('Crud/', include('Crud.urls')),
     path('matias/', include('crud_Matias.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
