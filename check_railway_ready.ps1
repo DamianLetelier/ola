@@ -39,8 +39,10 @@ if ($dockerfileContent -match "requirements.txt") {
 Write-Host ""
 Write-Host "Verificando dependencias de producción..." -ForegroundColor Yellow
 $prodDeps = Get-Content "requirements-prod.txt"
-$heavyDeps = @("torch", "spacy", "stanza", "nltk", "psutil")
+$requiredDeps = @("Django", "gunicorn", "whitenoise", "dj-database-url", "requests", "yara-python", "stanza", "Pillow")
+$heavyDeps = @("torch", "spacy", "nltk", "psutil")
 $foundHeavy = @()
+$missingRequired = @()
 
 foreach ($dep in $prodDeps) {
     $depName = ($dep -split ">=")[0] -split ">="
@@ -50,10 +52,31 @@ foreach ($dep in $prodDeps) {
     }
 }
 
+foreach ($reqDep in $requiredDeps) {
+    $found = $false
+    foreach ($dep in $prodDeps) {
+        $depName = ($dep -split ">=")[0] -split ">="
+        $depName = $depName[0].Trim()
+        if ($depName -eq $reqDep) {
+            $found = $true
+            break
+        }
+    }
+    if (-not $found) {
+        $missingRequired += $reqDep
+    }
+}
+
 if ($foundHeavy.Count -eq 0) {
-    Write-Host "✅ requirements-prod.txt está limpio (sin dependencias pesadas)" -ForegroundColor Green
+    Write-Host "✅ requirements-prod.txt está limpio (sin dependencias pesadas innecesarias)" -ForegroundColor Green
 } else {
-    Write-Host "❌ requirements-prod.txt contiene dependencias pesadas: $($foundHeavy -join ', ')" -ForegroundColor Red
+    Write-Host "⚠️ requirements-prod.txt contiene dependencias pesadas: $($foundHeavy -join ', ')" -ForegroundColor Yellow
+}
+
+if ($missingRequired.Count -eq 0) {
+    Write-Host "✅ requirements-prod.txt incluye todas las dependencias necesarias" -ForegroundColor Green
+} else {
+    Write-Host "❌ requirements-prod.txt faltan dependencias: $($missingRequired -join ', ')" -ForegroundColor Red
 }
 
 Write-Host ""

@@ -4,4 +4,8 @@ whitenoise
 dj-database-url
 python-dotenv
 django-crispy-forms
-crispy-bootstrap5 
+crispy-bootstrap5
+requests>=2.31.0
+yara-python>=4.3.0
+stanza>=1.7.0
+Pillow>=10.0.0 

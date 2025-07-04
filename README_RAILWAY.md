@@ -42,7 +42,7 @@ CMD ["gunicorn", "Crud_Damian.wsgi:application", "--bind", "0.0.0.0:8000"]
 ```
 
 ### requirements-prod.txt
-Solo dependencias esenciales para producción:
+Dependencias necesarias para producción (incluye ML básico):
 ```
 Django>=5.0
 gunicorn
@@ -51,6 +51,10 @@ dj-database-url
 python-dotenv
 django-crispy-forms
 crispy-bootstrap5
+requests>=2.31.0
+yara-python>=4.3.0
+stanza>=1.7.0
+Pillow>=10.0.0
 ```
 
 ### Procfile (opcional con Dockerfile)
