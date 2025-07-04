@@ -1,0 +1,19 @@
+# Dependencias de producción (base)
+Django>=4.2.0
+Pillow>=10.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+django-crispy-forms>=2.0
+crispy-bootstrap5>=0.7
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+dj-database-url>=2.1.0
+
+# Dependencias de desarrollo y machine learning
+psutil>=5.9.0
+stanza>=1.7.0
+nltk>=3.8.1
+spacy>=3.7.0
+
+# Nota: Estas librerías son pesadas y solo necesarias para desarrollo local
+# No se instalan en Railway para mantener el despliegue liviano 

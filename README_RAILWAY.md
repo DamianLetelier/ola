@@ -2,9 +2,14 @@
 
 Este proyecto está configurado para ser desplegado en Railway.
 
-## ⚠️ Importante: Reducción de Tamaño
+## ⚠️ Importante: Dependencias Separadas
 
-Railway tiene un límite de 4GB para el procesamiento de imágenes. Para asegurar que tu proyecto se despliegue correctamente, se han implementado las siguientes medidas:
+Railway tiene un límite de 4GB para el procesamiento de imágenes. El problema principal es que `requirements.txt` incluye librerías de machine learning muy pesadas (PyTorch, Spacy, Stanza, etc.) que no son necesarias para el despliegue web.
+
+### Solución Implementada:
+- **`requirements-prod.txt`**: Solo dependencias esenciales para Railway (~100MB)
+- **`requirements-dev.txt`**: Todas las dependencias para desarrollo local
+- **Railway usará `requirements-prod.txt`** para mantener el despliegue liviano
 
 ### Archivos Excluidos del Repositorio:
 - **Carpetas duplicadas**: `herramientas/` (copia completa del proyecto)
@@ -88,11 +93,19 @@ git commit -m "Preparado para Railway"
 git push origin main
 ```
 
-### 4. Desplegar en Railway
+### 4. Configurar Railway para usar dependencias livianas
 1. Conecta tu repositorio de GitHub a Railway
-2. Railway detectará automáticamente que es un proyecto Django
-3. Las migraciones se ejecutarán automáticamente
-4. Los archivos estáticos se recolectarán automáticamente
+2. Ve a **Settings** > **Nixpacks** > **Override build command**
+3. Coloca este comando:
+   ```bash
+   pip install -r requirements-prod.txt
+   ```
+4. Railway usará solo las dependencias esenciales (~100MB en lugar de 6.8GB)
+
+### 5. Desplegar en Railway
+1. Railway detectará automáticamente que es un proyecto Django
+2. Las migraciones se ejecutarán automáticamente
+3. Los archivos estáticos se recolectarán automáticamente
 
 ## Configuraciones Específicas
 
@@ -136,9 +149,16 @@ gunicorn Crud_Damian.wsgi
 
 ### Error: "Image too large"
 Si Railway muestra este error:
-1. Ejecuta `./clean_for_deploy.sh` para limpiar archivos grandes
-2. Verifica que no haya archivos multimedia grandes en el repositorio
-3. Asegúrate de que el `.gitignore` esté funcionando correctamente
+1. **Asegúrate de usar `requirements-prod.txt`** en Railway (paso 4)
+2. Ejecuta `.\aggressive_clean.ps1` para limpiar archivos grandes
+3. Verifica que no haya archivos multimedia grandes en el repositorio
+4. Asegúrate de que el `.gitignore` esté funcionando correctamente
+
+### Error: "ModuleNotFoundError: No module named 'dj_database_url'"
+Este error indica que Railway está usando el archivo incorrecto:
+1. Ve a Railway Settings > Nixpacks > Override build command
+2. Asegúrate de que el comando sea: `pip install -r requirements-prod.txt`
+3. No uses `requirements.txt` (contiene librerías pesadas innecesarias)
 
 ### Archivos Necesarios Después del Despliegue
 - Los archivos de media se pueden subir manualmente después del despliegue
