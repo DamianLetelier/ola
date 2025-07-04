@@ -296,8 +296,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid px-3">
-            <a class="navbar-brand" href="{% url 'landing' %}">
-                <i class="bi bi-shield-lock-fill"></i> Aegis Code
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'landing' %}">
+                <img src="{% static 'empresas/logo.png' %}" alt="Logo Aegis Code" height="32" class="me-2" style="max-height:32px;"> 
+                <span><i class="bi bi-shield-lock-fill"></i> Aegis Code</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
