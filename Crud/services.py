@@ -3,7 +3,6 @@ import json
 import logging
 import requests
 import hashlib
-import yara
 import time
 import shutil
 from datetime import datetime
@@ -20,6 +19,11 @@ YARA_RULES = {}
 def _cargar_reglas_yara():
     """Carga las reglas YARA desde el directorio de reglas."""
     global YARA_RULES
+    try:
+        import yara
+    except ImportError:
+        logger.warning("YARA no está disponible en este entorno. Las funciones de escaneo YARA no funcionarán.")
+        return
     try:
         if not os.path.exists(YARA_RULES_DIR):
             os.makedirs(YARA_RULES_DIR)
@@ -194,6 +198,14 @@ class ServicioEscaneo:
     def _escanear_yara_archivo(self, archivo_subido):
         """Escanea un archivo subido usando reglas YARA locales."""
         try:
+            try:
+                import yara
+            except ImportError:
+                return {
+                    'detectado': False,
+                    'resultados': [],
+                    'error': 'YARA no está disponible en este entorno. Usa la app en local para escaneo con YARA.'
+                }
             resultados = []
             
             # Asegurarse de que las reglas estén cargadas
