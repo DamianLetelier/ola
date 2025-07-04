@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-download"></i> Descargas - Aegis Code
+            </h1>
+            <p class="text-center text-muted">
+                Descarga la aplicación completa para uso local o solo los modelos de machine learning
+            </p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        {% for download in downloads_available %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="display-4 me-3">{{ download.icon }}</span>
+                        <div>
+                            <h5 class="card-title mb-1">{{ download.name }}</h5>
+                            <small class="text-muted">Tamaño: {{ download.size }}</small>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text">{{ download.description }}</p>
+                    
+                    <div class="mb-3">
+                        <strong>Incluye:</strong>
+                        <ul class="list-unstyled mt-2">
+                            {% for item in download.includes %}
+                            <li><i class="fas fa-check text-success me-2"></i>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{% url download.url_name %}" class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Descargar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Estado de Modelos ML -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot"></i> Estado de Modelos ML
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="models-status" class="row">
+                        <div class="col-12 text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Verificando estado de modelos...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Instrucciones de Instalación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>📦 Aplicación Completa</h6>
+                            <ol>
+                                <li>Descarga el archivo ZIP</li>
+                                <li>Extrae en una carpeta</li>
+                                <li>Ejecuta: <code>.\install-dev.ps1</code></li>
+                                <li>Ejecuta: <code>python manage.py migrate</code></li>
+                                <li>Ejecuta: <code>python manage.py runserver</code></li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🤖 Modelos ML</h6>
+                            <ol>
+                                <li>Los modelos se descargan automáticamente</li>
+                                <li>O usa el botón "Descargar Modelos ML"</li>
+                                <li>Se guardan en <code>media/ml_models/</code></li>
+                                <li>Reutilizables en futuras ejecuciones</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Verificar estado de modelos ML
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{% url "download-status" %}')
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById('models-status');
+            
+            if (data.status === 'success') {
+                let html = '';
+                const models = data.models;
+                
+                html += '<div class="col-md-4">';
+                html += '<div class="text-center">';
+                html += '<i class="fas fa-language fa-2x mb-2 ' + (models.stanza ? 'text-success' : 'text-muted') + '"></i>';
+                html += '<h6>Stanza (Español)</h6>';
+                html += '<span class="badge ' + (models.stanza ? 'bg-success' : 'bg-warning') + '">';
+                html += models.stanza ? 'Disponible' : 'No disponible';
+                html += '</span>';
+                html += '</div></div>';
+                
+                html += '<div class="col-md-4">';
+                html += '<div class="text-center">';
+                html += '<i class="fas fa-brain fa-2x mb-2 ' + (models.nltk ? 'text-success' : 'text-muted') + '"></i>';
+                html += '<h6>NLTK</h6>';
+                html += '<span class="badge ' + (models.nltk ? 'bg-success' : 'bg-warning') + '">';
+                html += models.nltk ? 'Disponible' : 'No disponible';
+                html += '</span>';
+                html += '</div></div>';
+                
+                html += '<div class="col-md-4">';
+                html += '<div class="text-center">';
+                html += '<i class="fas fa-shield-alt fa-2x mb-2 ' + (models.yara ? 'text-success' : 'text-muted') + '"></i>';
+                html += '<h6>YARA Rules</h6>';
+                html += '<span class="badge ' + (models.yara ? 'bg-success' : 'bg-warning') + '">';
+                html += models.yara ? 'Disponible' : 'No disponible';
+                html += '</span>';
+                html += '</div></div>';
+                
+                statusDiv.innerHTML = html;
+            } else {
+                statusDiv.innerHTML = '<div class="col-12 text-center text-danger">Error al verificar estado de modelos</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('models-status').innerHTML = '<div class="col-12 text-center text-danger">Error al verificar estado de modelos</div>';
+        });
+});
+</script>
+{% endblock %} 

@@ -5,6 +5,7 @@ import requests
 import hashlib
 import yara
 import time
+import shutil
 from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
@@ -350,6 +351,126 @@ class ServicioEscaneo:
 # Instancia global del servicio
 servicio_escaneo = ServicioEscaneo()
 
+class MLModelManager:
+    """Gestor de modelos de Machine Learning con descarga dinámica"""
+    
+    def __init__(self):
+        self.models_dir = os.path.join(settings.BASE_DIR, 'media', 'ml_models')
+        self.stanza_dir = os.path.join(self.models_dir, 'stanza')
+        self.nltk_dir = os.path.join(self.models_dir, 'nltk_data')
+        
+        # Crear directorios si no existen
+        os.makedirs(self.models_dir, exist_ok=True)
+        os.makedirs(self.stanza_dir, exist_ok=True)
+        os.makedirs(self.nltk_dir, exist_ok=True)
+        
+        logger.info(f"MLModelManager inicializado. Directorio: {self.models_dir}")
+    
+    def ensure_stanza_models(self):
+        """Asegura que los modelos de Stanza estén disponibles"""
+        try:
+            import stanza
+            
+            # Verificar si el modelo español ya existe
+            es_model_path = os.path.join(self.stanza_dir, 'es')
+            if not os.path.exists(es_model_path):
+                logger.info("Descargando modelo Stanza para español...")
+                stanza.download('es', model_dir=self.stanza_dir)
+                logger.info("Modelo Stanza descargado exitosamente")
+            else:
+                logger.info("Modelo Stanza ya existe")
+            
+            return True
+            
+        except ImportError:
+            logger.warning("Stanza no está instalado")
+            return False
+        except Exception as e:
+            logger.error(f"Error descargando Stanza: {str(e)}")
+            return False
+    
+    def ensure_nltk_models(self):
+        """Asegura que los modelos de NLTK estén disponibles"""
+        try:
+            import nltk
+            
+            # Agregar directorio personalizado a NLTK
+            nltk.data.path.append(self.nltk_dir)
+            
+            # Modelos necesarios
+            models_to_download = ['punkt', 'stopwords', 'wordnet']
+            
+            for model in models_to_download:
+                try:
+                    nltk.data.find(f'tokenizers/{model}')
+                    logger.info(f"Modelo NLTK {model} ya existe")
+                except LookupError:
+                    logger.info(f"Descargando modelo NLTK {model}...")
+                    nltk.download(model, download_dir=self.nltk_dir)
+                    logger.info(f"Modelo NLTK {model} descargado")
+            
+            return True
+            
+        except ImportError:
+            logger.warning("NLTK no está instalado")
+            return False
+        except Exception as e:
+            logger.error(f"Error descargando NLTK: {str(e)}")
+            return False
+    
+    def get_models_status(self):
+        """Obtiene el estado de los modelos ML"""
+        status = {
+            'stanza': False,
+            'nltk': False,
+            'yara': False,
+            'models_dir': self.models_dir
+        }
+        
+        # Verificar Stanza
+        try:
+            es_model_path = os.path.join(self.stanza_dir, 'es')
+            status['stanza'] = os.path.exists(es_model_path)
+        except:
+            pass
+        
+        # Verificar NLTK
+        try:
+            nltk_data_path = os.path.join(self.nltk_dir, 'tokenizers')
+            status['nltk'] = os.path.exists(nltk_data_path)
+        except:
+            pass
+        
+        # Verificar YARA
+        yara_rules_dir = os.path.join(settings.BASE_DIR, 'yara_rules')
+        status['yara'] = os.path.exists(yara_rules_dir) and len(os.listdir(yara_rules_dir)) > 0
+        
+        return status
+    
+    def cleanup_old_models(self):
+        """Limpia modelos antiguos para ahorrar espacio"""
+        try:
+            # Limpiar archivos temporales de descarga
+            temp_patterns = ['*.tmp', '*.download', '*.part']
+            for pattern in temp_patterns:
+                for root, dirs, files in os.walk(self.models_dir):
+                    for file in files:
+                        if file.endswith(pattern.replace('*', '')):
+                            file_path = os.path.join(root, file)
+                            try:
+                                os.remove(file_path)
+                                logger.info(f"Archivo temporal eliminado: {file_path}")
+                            except:
+                                pass
+            
+            return True
+        except Exception as e:
+            logger.error(f"Error limpiando modelos: {str(e)}")
+            return False
+
+# Instancia global del gestor de modelos
+ml_model_manager = MLModelManager()
+
 class ServicioAnalisisStanza:
     """Servicio para análisis de texto usando Stanza (NLP)"""
     
@@ -411,22 +532,30 @@ class ServicioAnalisisStanza:
         logger.info("ServicioAnalisisStanza inicializado")
     
     def _inicializar_stanza(self):
-        """Inicializa Stanza con el modelo en español"""
+        """Inicializa Stanza con el modelo en español usando descarga dinámica"""
         try:
             import stanza
-            # Descargar modelo en español si no está disponible
-            try:
-                self.nlp = stanza.Pipeline('es', processors='tokenize,pos,lemma,ner')
-                logger.info("Modelo Stanza en español cargado correctamente")
-            except Exception as e:
-                logger.warning(f"No se pudo cargar modelo español: {str(e)}")
-                # Intentar con modelo en inglés como fallback
+            
+            # Usar el gestor de modelos para asegurar que los modelos estén disponibles
+            if ml_model_manager.ensure_stanza_models():
                 try:
-                    self.nlp = stanza.Pipeline('en', processors='tokenize,pos,lemma,ner')
-                    logger.info("Modelo Stanza en inglés cargado como fallback")
-                except Exception as e2:
-                    logger.error(f"No se pudo cargar ningún modelo de Stanza: {str(e2)}")
-                    self.nlp = None
+                    # Cargar modelo usando el directorio personalizado
+                    self.nlp = stanza.Pipeline('es', processors='tokenize,pos,lemma,ner', 
+                                             model_dir=ml_model_manager.stanza_dir)
+                    logger.info("Modelo Stanza en español cargado correctamente")
+                except Exception as e:
+                    logger.warning(f"No se pudo cargar modelo español: {str(e)}")
+                    # Intentar con modelo en inglés como fallback
+                    try:
+                        self.nlp = stanza.Pipeline('en', processors='tokenize,pos,lemma,ner')
+                        logger.info("Modelo Stanza en inglés cargado como fallback")
+                    except Exception as e2:
+                        logger.error(f"No se pudo cargar ningún modelo de Stanza: {str(e2)}")
+                        self.nlp = None
+            else:
+                logger.error("No se pudieron descargar los modelos de Stanza")
+                self.nlp = None
+                
         except ImportError:
             logger.error("Stanza no está instalado. El análisis de texto no estará disponible.")
             self.nlp = None

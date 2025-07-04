@@ -3,89 +3,155 @@
 {% block title %}Sistema de Seguridad Empresarial - Protección Integral{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="container-fluid bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    Protección Empresarial Inteligente
-                </h1>
-                <p class="lead mb-4">
-                    Monitoreo continuo, detección de amenazas y respuesta proactiva para proteger su empresa
-                    contra ciberamenazas emergentes.
-                </p>
-                <div class="d-grid gap-2 d-md-flex">
-                    <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4 me-md-2">
-                        Comenzar Ahora
-                    </a>
-                    <a href="#caracteristicas" class="btn btn-outline-light btn-lg px-4">
-                        Conocer Más
-                    </a>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        scroll-behavior: smooth;
+        scroll-snap-type: y mandatory;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    section.fullscreen-section {
+        height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .bg-gradient-purple {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: white;
+    }
+
+    .card-title,
+    .card-body i {
+        color: #6a11cb;
+    }
+
+    .btn-light,
+    .btn-outline-light {
+        border-radius: 0.5rem;
+    }
+
+    .btn-light:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+</style>
+
+<!-- Sección 1: Hero + Características -->
+<section class="fullscreen-section">
+    <!-- Hero Section -->
+    <div class="container-fluid bg-gradient-purple py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Protección Empresarial Inteligente
+                    </h1>
+                    <p class="lead mb-4">
+                        Monitoreo continuo, detección de amenazas y respuesta proactiva para proteger su empresa
+                        contra ciberamenazas emergentes.
+                    </p>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4 me-md-2">
+                            Comenzar Ahora
+                        </a>
+                        <a href="#caracteristicas" class="btn btn-outline-light btn-lg px-4">
+                            Conocer Más
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-6 text-center">
-                <img src="https://cdn-icons-png.flaticon.com/512/2092/2092663.png" 
-                     alt="Seguridad Empresarial" class="img-fluid" style="max-width: 400px;">
+                <div class="col-md-6 text-center">
+                    <img src="media/empresas/logo.png" 
+                         alt="Seguridad Empresarial" class="img-fluid" style="max-width: 400px;">
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Características -->
-<div id="caracteristicas" class="container py-5">
-    <h2 class="text-center mb-5">Características Principales</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-shield-check display-4 text-primary mb-3"></i>
-                    <h3 class="card-title h4">Monitoreo Continuo</h3>
-                    <p class="card-text">
-                        Vigilancia 24/7 de su infraestructura con detección proactiva de amenazas
-                        y análisis en tiempo real.
-                    </p>
+    <!-- Características -->
+    <div id="caracteristicas" class="container py-5">
+        <h2 class="text-center mb-5">Características Principales</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-check display-4 mb-3"></i>
+                        <h3 class="card-title h4">Monitoreo Continuo</h3>
+                        <p class="card-text">
+                            Vigilancia 24/7 de su infraestructura con detección proactiva de amenazas
+                            y análisis en tiempo real.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-graph-up-arrow display-4 text-primary mb-3"></i>
-                    <h3 class="card-title h4">Dashboard Intuitivo</h3>
-                    <p class="card-text">
-                        Visualización clara de amenazas, estadísticas y estado de seguridad
-                        de su empresa en tiempo real.
-                    </p>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-up-arrow display-4 mb-3"></i>
+                        <h3 class="card-title h4">Dashboard Intuitivo</h3>
+                        <p class="card-text">
+                            Visualización clara de amenazas, estadísticas y estado de seguridad
+                            de su empresa en tiempo real.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="bi bi-bell display-4 text-primary mb-3"></i>
-                    <h3 class="card-title h4">Alertas Personalizadas</h3>
-                    <p class="card-text">
-                        Notificaciones configurables según el nivel de amenaza y las necesidades
-                        específicas de su empresa.
-                    </p>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-bell display-4 mb-3"></i>
+                        <h3 class="card-title h4">Alertas Personalizadas</h3>
+                        <p class="card-text">
+                            Notificaciones configurables según el nivel de amenaza y las necesidades
+                            específicas de su empresa.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Beneficios -->
-<div class="container-fluid bg-light py-5">
-    <div class="container">
+<!-- Sección 2: Datos -->
+<section id="datos" class="fullscreen-section container py-5">
+    <h2 class="text-center mb-5">Tu empresa puede estar en peligro</h2>
+
+    <div class="row g-4 justify-content-center align-items-center">
+        <!-- Gráfico de dona -->
+        <div class="col-md-6 text-center">
+            <h5 class="mb-3">Tipos de ataque más comunes</h5>
+            <canvas id="chartAtaques" width="250" height="250"></canvas>
+        </div>
+
+        <!-- Gráfico de barras -->
+        <div class="col-md-6 text-center">
+            <h5 class="mb-3">Intentos de ciberataques en Chile</h5>
+            <canvas id="chartAtaquesChile" width="250" height="250"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Sección 3: Beneficios + CTA -->
+<section class="fullscreen-section">
+    <div class="container py-5">
         <h2 class="text-center mb-5">¿Por qué elegirnos?</h2>
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
-                    <div>
-                        <h4>Protección Integral</h4>
-                        <p class="text-muted">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-shield-lock display-4 mb-3"></i>
+                        <h4 class="card-title">Protección Integral</h4>
+                        <p class="card-text text-muted">
                             Cubrimos todos los aspectos de la seguridad empresarial, desde la detección
                             de malware hasta la prevención de phishing.
                         </p>
@@ -93,11 +159,11 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
-                    <div>
-                        <h4>Fácil de Implementar</h4>
-                        <p class="text-muted">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-gear display-4 mb-3"></i>
+                        <h4 class="card-title">Fácil de Implementar</h4>
+                        <p class="card-text text-muted">
                             Configuración rápida y sencilla, sin necesidad de conocimientos técnicos
                             avanzados.
                         </p>
@@ -105,11 +171,11 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
-                    <div>
-                        <h4>Escalable</h4>
-                        <p class="text-muted">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-arrows-angle-expand display-4 mb-3"></i>
+                        <h4 class="card-title">Escalable</h4>
+                        <p class="card-text text-muted">
                             Adaptable a empresas de cualquier tamaño, desde pequeñas empresas
                             hasta grandes corporaciones.
                         </p>
@@ -117,11 +183,11 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
-                    <div>
-                        <h4>Soporte Continuo</h4>
-                        <p class="text-muted">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-headset display-4 mb-3"></i>
+                        <h4 class="card-title">Soporte Continuo</h4>
+                        <p class="card-text text-muted">
                             Asistencia técnica permanente y actualizaciones regulares para mantener
                             su sistema protegido.
                         </p>
@@ -130,21 +196,128 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- CTA -->
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <h2 class="mb-4">¿Listo para proteger su empresa?</h2>
-            <p class="lead mb-4">
-                Únase a cientos de empresas que ya confían en nuestro sistema
-                de seguridad empresarial.
-            </p>
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
-                Comenzar Gratis
-            </a>
+    <!-- CTA -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">¿Listo para proteger su empresa?</h2>
+                <p class="lead mb-4">
+                    Únase a cientos de empresas que ya confían en nuestro sistema
+                    de seguridad empresarial.
+                </p>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
+                    Comenzar Gratis
+                </a>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %} 
+</section>
+
+<!-- Script de Chart.js y animación con IntersectionObserver -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ataqueData = {
+        labels: ['Phishing', 'Malware', 'BEC', 'Ransomware', 'DDoS'],
+        datasets: [{
+            data: [43, 37, 28, 20, 18],
+            backgroundColor: [
+                '#6a11cb', // Phishing
+                '#2575fc', // Malware
+                '#17a2b8', // BEC
+                '#ffc107', // Ransomware
+                '#dc3545'  // DDoS
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    const ataqueOptions = {
+        cutout: '65%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#333',
+                    font: {
+                        size: 14
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: (context) => `${context.label}: ${context.parsed}%`
+                }
+            }
+        },
+        animation: {
+            animateRotate: true,
+            duration: 2500
+        }
+    };
+
+// Gráfico de barras - Intentos de ataques en Chile por año
+    const chileAttackData = {
+        labels: ['2022', '2023', '2024'],
+        datasets: [{
+            label: 'Intentos (miles de millones)',
+            data: [5, 6, 27.6],
+            backgroundColor: '#2575fc'
+        }]
+    };
+
+    const chileAttackOptions = {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    // Mostrar valores en miles de millones
+                    callback: function(value) {
+                        return value + ' B';
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Intentos (miles de millones)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Año'
+                }
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.parsed.y} miles de millones`
+                }
+            }
+        },
+        animation: {
+            duration: 1500,
+            easing: 'easeOutQuart'
+        }
+    };
+
+    const ctxAtaques = document.getElementById('chartAtaques').getContext('2d');
+    new Chart(ctxAtaques, {
+        type: 'doughnut',
+        data: ataqueData,
+        options: ataqueOptions
+    });
+
+    const ctxChile = document.getElementById('chartAtaquesChile').getContext('2d');
+    new Chart(ctxChile, {
+        type: 'bar',
+        data: chileAttackData,
+        options: chileAttackOptions
+    });
+</script>
+
+
+
+
+{% endblock %}

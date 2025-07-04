@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
 from . import views
+from . import download_views
 
 urlpatterns = [
     # Vistas principales
@@ -42,4 +43,10 @@ urlpatterns = [
     
     # Documentación
     path('manual/', views.manual_usuario, name='manual_usuario'),
+    
+    # Descargas
+    path('downloads/', download_views.download_page_view, name='downloads'),
+    path('downloads/download-app/', download_views.download_app_view, name='download-app'),
+    path('downloads/download-models/', download_views.download_models_view, name='download-models'),
+    path('downloads/status/', download_views.download_status_view, name='download-status'),
 ] 
