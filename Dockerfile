@@ -1,24 +1,21 @@
-# Usa una imagen base liviana
 FROM python:3.11-slim
 
-# Crea y activa entorno virtual
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Establece directorio de trabajo
 WORKDIR /app
 
-# Copia solo los archivos necesarios primero (para cache)
+# Copiar solo requirements-prod.txt, NO requirements.txt
 COPY requirements-prod.txt .
 
-# Instala solo dependencias esenciales
+# Instalar SOLO las dependencias livianas
 RUN pip install --upgrade pip && pip install -r requirements-prod.txt
 
-# Copia el resto del proyecto (NO requirements.txt)
+# Copiar el resto del proyecto después de la instalación
 COPY . .
 
-# Expone el puerto correcto
+# Expone el puerto correcto para Railway (usualmente 8080)
 EXPOSE 8080
 
-# Comando de ejecución
 CMD ["gunicorn", "Crud_Damian.wsgi:application", "--bind", "0.0.0.0:8080"] 
