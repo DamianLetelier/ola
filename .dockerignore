@@ -35,7 +35,6 @@ data/
 *.mypy_cache/
 *.pytest_cache/
 node_modules/
-media/
 .git/
 .gitignore
 .env
