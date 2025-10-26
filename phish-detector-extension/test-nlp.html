@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Code - Test NLP Phishing Detection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-section h3 {
+            color: #555;
+            margin-top: 0;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .risk-high { border-left-color: #f44336; }
+        .risk-medium { border-left-color: #ff9800; }
+        .risk-low { border-left-color: #4caf50; }
+        .indicator {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .score-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ff9800, #f44336);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🛡️ Aegis Code NLP Test</h1>
+            <p style="text-align: center; color: #666;">Prueba la detección de phishing con análisis de lenguaje natural</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📧 Ejemplo 1: Email de Phishing Típico</h3>
+            <textarea id="test1">Estimado cliente de Santander,
+
+Su cuenta ha sido suspendida temporalmente debido a actividad sospechosa. Para reactivar su cuenta, debe verificar inmediatamente su información personal.
+
+Haga clic aquí para iniciar sesión: http://santandar-seguridad.com/verificacion
+
+URGENTE: Tiene 24 horas para completar este proceso o su cuenta será cerrada permanentemente.
+
+Atentamente,
+Departamento de Seguridad
+Banco Santander</textarea>
+            <button onclick="analyzeText('test1')">Analizar con NLP</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🎁 Ejemplo 2: Phishing con Oferta Falsa</h3>
+            <textarea id="test2">¡FELICIDADES! Ha sido seleccionado para recibir un premio de €5,000 de PayPal.
+
+Para reclamar su premio, debe:
+1. Confirmar su información personal
+2. Proporcionar su número de tarjeta de crédito
+3. Verificar su contraseña de PayPal
+
+¡Actúe ahora! Esta oferta expira hoy. Visite: paypall-premio.com
+
+Equipo de Soporte
+PayPal España</textarea>
+            <button onclick="analyzeText('test2')">Analizar con NLP</button>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ Ejemplo 3: Email Legítimo</h3>
+            <textarea id="test3">Estimado cliente,
+
+Le informamos que su factura mensual de Netflix está disponible en su cuenta.
+
+Puede revisar los detalles de su suscripción iniciando sesión en netflix.com con sus credenciales habituales.
+
+Si tiene alguna pregunta, puede contactar nuestro servicio de atención al cliente.
+
+Saludos cordiales,
+Equipo de Netflix</textarea>
+            <button onclick="analyzeText('test3')">Analizar con NLP</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Prueba Personalizada</h3>
+            <textarea id="custom" placeholder="Escriba aquí el texto que desea analizar..."></textarea>
+            <button onclick="analyzeText('custom')">Analizar con NLP</button>
+        </div>
+
+        <div id="results" class="results" style="display: none;">
+            <h3>📊 Resultados del Análisis NLP</h3>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script src="nlp-sentiment.js"></script>
+    <script src="nlp-entities.js"></script>
+    <script>
+        // Initialize NLP analyzers
+        const sentimentAnalyzer = new PhishingSentimentAnalyzer();
+        const entityDetector = new PhishingEntityDetector();
+
+        function analyzeText(textareaId) {
+            const text = document.getElementById(textareaId).value;
+            if (!text.trim()) {
+                alert('Por favor, ingrese texto para analizar');
+                return;
+            }
+
+            // Run NLP analysis
+            const sentimentAnalysis = sentimentAnalyzer.analyzeSentiment(text);
+            const entityAnalysis = entityDetector.analyzeEntities(text);
+            
+            // Calculate combined score
+            const combinedScore = (sentimentAnalysis.overallRisk + entityAnalysis.overallRisk) / 2;
+            
+            // Display results
+            displayResults(text, sentimentAnalysis, entityAnalysis, combinedScore);
+        }
+
+        function displayResults(text, sentiment, entities, combinedScore) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultsContent');
+            
+            let riskLevel = 'Bajo';
+            let riskClass = 'risk-low';
+            
+            if (combinedScore > 7) {
+                riskLevel = 'Muy Alto';
+                riskClass = 'risk-high';
+            } else if (combinedScore > 5) {
+                riskLevel = 'Alto';
+                riskClass = 'risk-high';
+            } else if (combinedScore > 3) {
+                riskLevel = 'Medio';
+                riskClass = 'risk-medium';
+            }
+            
+            resultsDiv.className = `results ${riskClass}`;
+            
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4>Nivel de Riesgo: ${riskLevel}</h4>
+                    <span style="font-size: 18px; font-weight: bold;">${combinedScore.toFixed(1)}/10</span>
+                </div>
+                
+                <div class="score-bar">
+                    <div class="score-fill" style="width: ${Math.min(100, (combinedScore / 10) * 100)}%"></div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div>
+                        <h4>📈 Análisis de Sentimientos</h4>
+                        <p><strong>Puntuación:</strong> ${sentiment.overallRisk.toFixed(1)}/10</p>
+                        <p><strong>Urgencia:</strong> ${sentiment.urgencyScore.toFixed(1)}/10</p>
+                        <p><strong>Amenazas:</strong> ${sentiment.threatScore.toFixed(1)}/10</p>
+                        <p><strong>Manipulación:</strong> ${sentiment.manipulationScore.toFixed(1)}/10</p>
+                        <p><strong>Info. Sensible:</strong> ${sentiment.sensitiveRequestScore.toFixed(1)}/10</p>
+                    </div>
+                    
+                    <div>
+                        <h4>🏷️ Análisis de Entidades</h4>
+                        <p><strong>Puntuación:</strong> ${entities.overallRisk.toFixed(1)}/10</p>
+                        <p><strong>Marcas detectadas:</strong> ${entities.detectedBrands.length}</p>
+                        <p><strong>Typosquatting:</strong> ${entities.typosquattingAttempts.length}</p>
+                        <p><strong>Contexto sospechoso:</strong> ${entities.contextualRisk.toFixed(1)}/10</p>
+                    </div>
+                </div>
+            `;
+            
+            // Add indicators
+            const allIndicators = [...sentiment.indicators, ...entities.indicators];
+            if (allIndicators.length > 0) {
+                html += '<h4>🔍 Indicadores Detectados:</h4>';
+                allIndicators.forEach(indicator => {
+                    html += `<div class="indicator"><strong>${indicator.type}:</strong> ${indicator.description}</div>`;
+                });
+            }
+            
+            // Add specific findings
+            if (entities.typosquattingAttempts.length > 0) {
+                html += '<h4>⚠️ Intentos de Typosquatting:</h4>';
+                entities.typosquattingAttempts.forEach(attempt => {
+                    html += `<div class="indicator" style="background: #ffebee;">
+                        <strong>Detectado:</strong> "${attempt.detected}" 
+                        <strong>Debería ser:</strong> "${attempt.legitimate}"
+                    </div>`;
+                });
+            }
+            
+            if (entities.detectedBrands.length > 0) {
+                html += '<h4>🏢 Marcas Mencionadas:</h4>';
+                entities.detectedBrands.forEach(brand => {
+                    html += `<div class="indicator" style="background: #e3f2fd;">
+                        <strong>${brand.brand}</strong> (${brand.category}) - ${brand.count} menciones
+                    </div>`;
+                });
+            }
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Auto-analyze first example on load
+        window.onload = function() {
+            setTimeout(() => {
+                analyzeText('test1');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

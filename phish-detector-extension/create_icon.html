@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Aegis Icon</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .preview { margin: 20px 0; display: flex; gap: 20px; flex-wrap: wrap; }
+        .icon-preview { text-align: center; margin: 10px; }
+        canvas { border: 1px solid #ddd; margin-bottom: 5px; }
+        button { padding: 10px 15px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1565c0; }
+    </style>
+</head>
+<body>
+    <h2>Generate Aegis Icons</h2>
+    <p>Click the button below to generate and download the icon files.</p>
+    
+    <button id="generateBtn">Generate Icons</button>
+    
+    <div class="preview" id="preview"></div>
+    
+    <script>
+        function createAegisIcon(size, text = 'A') {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw shield background
+            ctx.fillStyle = '#1976d2';
+            ctx.beginPath();
+            const padding = size * 0.1;
+            const radius = size * 0.2;
+            
+            // Draw shield shape
+            ctx.moveTo(size / 2, padding);
+            ctx.lineTo(size - padding, size * 0.3);
+            ctx.quadraticCurveTo(size - padding, size * 0.7, size * 0.8, size * 0.85);
+            ctx.quadraticCurveTo(size / 2, size - padding, size * 0.2, size * 0.85);
+            ctx.quadraticCurveTo(padding, size * 0.7, padding, size * 0.3);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, size / 2, size / 2);
+            
+            return canvas;
+        }
+        
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const sizes = [16, 32, 48, 128];
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            
+            sizes.forEach(size => {
+                const canvas = createAegisIcon(size, 'A');
+                const filename = `icon${size}.png`;
+                
+                // Create preview
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'icon-preview';
+                previewDiv.innerHTML = `
+                    <div>${filename}</div>
+                    <div>${size}x${size}px</div>
+                `;
+                previewDiv.appendChild(canvas);
+                preview.appendChild(previewDiv);
+                
+                // Download file
+                downloadCanvas(canvas, filename);
+            });
+            
+            alert('Icons generated successfully! Please save them in the images/ folder.');
+        });
+    </script>
+</body>
+</html>

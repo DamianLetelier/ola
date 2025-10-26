@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .icon-preview { display: inline-block; margin: 10px; text-align: center; }
+        canvas { border: 1px solid #ccc; }
+        button { margin: 10px 0; padding: 8px 15px; }
+    </style>
+</head>
+<body>
+    <h2>Generate Extension Icons</h2>
+    <p>Click the button below to generate and download the icon files.</p>
+    
+    <div>
+        <button id="generateBtn">Generate Icons</button>
+    </div>
+    
+    <div id="preview"></div>
+    
+    <script>
+        function generateIcon(size, color, text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw background
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `${Math.floor(size * 0.6)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, size/2, size/2);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        function download(dataURL, filename) {
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const sizes = [16, 48, 128];
+            const color = '#4285F4'; // Blue color
+            const text = 'PD'; // PD for Phish Detector
+            
+            sizes.forEach(size => {
+                const dataURL = generateIcon(size, color, text);
+                const filename = `icon${size}.png`;
+                download(dataURL, filename);
+                
+                // Show preview
+                const preview = document.createElement('div');
+                preview.className = 'icon-preview';
+                preview.innerHTML = `
+                    <div>${filename}</div>
+                    <img src="${dataURL}" alt="${filename}" style="width: ${size}px; height: ${size}px;">
+                `;
+                document.getElementById('preview').appendChild(preview);
+            });
+            
+            alert('Icons generated successfully! Please save them in the images/ folder.');
+        });
+    </script>
+</body>
+</html>
